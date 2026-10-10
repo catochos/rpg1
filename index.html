@@ -12,8 +12,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px 0;
+            box-sizing: border-box;
         }
         .login-box {
             background: #1e1e1e;
@@ -21,7 +23,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             text-align: center;
-            width: 320px;
+            width: 340px;
         }
         input {
             width: 85%;
@@ -99,15 +101,38 @@
     </div>
 
     <script>
-        // Mapeamento de Senhas -> Páginas HTML e Nomes de Exibição dos Atalhos
+        // Mapeamento Completo das Pistas, Documentos e Páginas
         const rotas = {
+            // Páginas HTML
             "caderno": { arquivo: "Caderno.html", nome: "Caderno" },
             "celular": { arquivo: "Celular - c.html", nome: "Celular" },
-            "cubo magico": { arquivo: "Cubo Mágico 3D.html", nome: "Cubo Mágico 3D" },
-            "cubo magico 3d": { arquivo: "Cubo Mágico 3D.html", nome: "Cubo Mágico 3D" },
+            "cubo magico": { arquivo: "Cubo Mágico 3D (1) (1).html", nome: "Cubo Mágico 3D" },
+            "cubo magico 3d": { arquivo: "Cubo Mágico 3D (1) (1).html", nome: "Cubo Mágico 3D" },
             "papel amassado": { arquivo: "papel amassado.html", nome: "Papel Amassado" },
             "post it": { arquivo: "Post-it.html", nome: "Post-it" },
-            "post-it": { arquivo: "Post-it.html", nome: "Post-it" }
+            "post-it": { arquivo: "Post-it.html", nome: "Post-it" },
+            "geladeira": { arquivo: "Geladeira_3D (2).html", nome: "Geladeira 3D" },
+            "geladeira 3d": { arquivo: "Geladeira_3D (2).html", nome: "Geladeira 3D" },
+            "diario": { arquivo: "Diário da Maya.html", nome: "Diário da Maya" },
+            "diario da maya": { arquivo: "Diário da Maya.html", nome: "Diário da Maya" },
+
+            // Documentos PDF
+            "gmail": { arquivo: "GMAILS NO COMPUTADOR.pdf.pdf", nome: "Gmails no Computador (PDF)" },
+            "gmails": { arquivo: "GMAILS NO COMPUTADOR.pdf.pdf", nome: "Gmails no Computador (PDF)" },
+            "gmails no computador": { arquivo: "GMAILS NO COMPUTADOR.pdf.pdf", nome: "Gmails no Computador (PDF)" },
+            "medida protetiva": { arquivo: "Medida protetiva elena guerra.pdf.pdf", nome: "Medida Protetiva Elena Guerra (PDF)" },
+            "elena guerra": { arquivo: "Medida protetiva elena guerra.pdf.pdf", nome: "Medida Protetiva Elena Guerra (PDF)" },
+            "calendario": { arquivo: "Calendário de Setembro de 2004 - Elena Guerra.pdf.pdf", nome: "Calendário de Setembro de 2004 (PDF)" },
+            "calendario 2004": { arquivo: "Calendário de Setembro de 2004 - Elena Guerra.pdf.pdf", nome: "Calendário de Setembro de 2004 (PDF)" },
+            "calendario setembro": { arquivo: "Calendário de Setembro de 2004 - Elena Guerra.pdf.pdf", nome: "Calendário de Setembro de 2004 (PDF)" },
+            "contrato": { arquivo: "Contrato Escoteiros Saint-Denis.pdf.pdf", nome: "Contrato Escoteiros Saint-Denis (PDF)" },
+            "escoteiros": { arquivo: "Contrato Escoteiros Saint-Denis.pdf.pdf", nome: "Contrato Escoteiros Saint-Denis (PDF)" },
+            "saint denis": { arquivo: "Contrato Escoteiros Saint-Denis.pdf.pdf", nome: "Contrato Escoteiros Saint-Denis (PDF)" },
+
+            // Imagens
+            "desenho": { arquivo: "desenho.png", nome: "Desenho" },
+            "folha do caderno": { arquivo: "folha do caderno.png", nome: "Folha do Caderno" },
+            "folha": { arquivo: "folha do caderno.png", nome: "Folha do Caderno" }
         };
 
         function normalizarTexto(texto) {
@@ -119,23 +144,27 @@
             const secaoAtalhos = document.getElementById("secaoAtalhos");
             listaAtalhosDiv.innerHTML = "";
 
-            // Busca do localStorage as senhas já usadas com sucesso
             let atalhosSalvos = JSON.parse(localStorage.getItem("rpg_atalhos_desbloqueados")) || [];
 
             if (atalhosSalvos.length > 0) {
                 secaoAtalhos.style.display = "block";
                 
-                // Cria um botão para cada senha desbloqueada única
+                // Remove duplicatas de nomes na exibição dos botões
+                let exibidos = [];
+
                 atalhosSalvos.forEach(senhaKey => {
                     if (rotas[senhaKey]) {
                         const info = rotas[senhaKey];
-                        const btn = document.createElement("button");
-                        btn.className = "atalho-btn";
-                        btn.textContent = `Acessar: ${info.nome}`;
-                        btn.onclick = function() {
-                            window.location.href = info.arquivo;
-                        };
-                        listaAtalhosDiv.appendChild(btn);
+                        if (!exibidos.includes(info.nome)) {
+                            exibidos.push(info.nome);
+                            const btn = document.createElement("button");
+                            btn.className = "atalho-btn";
+                            btn.textContent = `Acessar: ${info.nome}`;
+                            btn.onclick = function() {
+                                window.location.href = info.arquivo;
+                            };
+                            listaAtalhosDiv.appendChild(btn);
+                        }
                     }
                 });
             } else {
@@ -149,28 +178,24 @@
             const erroDiv = document.getElementById("erro");
 
             if (rotas[senhaNormalizada]) {
-                // Salva no localStorage que esta senha já foi descoberta
                 let atalhosSalvos = JSON.parse(localStorage.getItem("rpg_atalhos_desbloqueados")) || [];
                 if (!atalhosSalvos.includes(senhaNormalizada)) {
                     atalhosSalvos.push(senhaNormalizada);
                     localStorage.setItem("rpg_atalhos_desbloqueados", JSON.stringify(atalhosSalvos));
                 }
 
-                // Redireciona para o HTML correspondente
                 window.location.href = rotas[senhaNormalizada].arquivo;
             } else {
                 erroDiv.textContent = "Senha incorreta!";
             }
         }
 
-        // Permitir apertar "Enter" para enviar
         document.getElementById("senhaInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 tentarAcessar();
             }
         });
 
-        // Carrega os atalhos salvos assim que a página abre
         window.onload = carregarAtalhos;
     </script>
 
