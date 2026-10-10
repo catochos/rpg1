@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celular Antigo 3D - Investigação RPG (2004)</title>
+    <!-- Importando a fonte Roboto do Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'Roboto', sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            pointer-events: none;
+            text-shadow: 1px 1px #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Use WASD para mover a câmera. Scroll fora da tela dá zoom. Scroll na tela LCD rola as mensagens.</div>
+
+    <!-- Importando Three.js e OrbitControls via CDN estável -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- CONFIGURAÇÃO DA CENA ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 16);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true; 
+        controls.minDistance = 5;
+        controls.maxDistance = 25;
+
+        // --- CONTROLE DE MOVIMENTO COM WASD ---
+        const moveState = { forward: false, backward: false, left: false, right: false };
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') moveState.forward = true;
+            if (e.key === 's' || e.key === 'S') moveState.backward = true;
+            if (e.key === 'a' || e.key === 'A') moveState.left = true;
+            if (e.key === 'd' || e.key === 'D') moveState.right = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') moveState.forward = false;
+            if (e.key === 's' || e.key === 'S') moveState.backward = false;
+            if (e.key === 'a' || e.key === 'A') moveState.left = false;
+            if (e.key === 'd' || e.key === 'D') moveState.right = false;
+        });
+
+        function updateCameraPosition() {
+            const speed = 0.1;
+            if (moveState.forward) controls.target.y += speed;
+            if (moveState.backward) controls.target.y -= speed;
+            if (moveState.left) controls.target.x -= speed;
+            if (moveState.right) controls.target.x += speed;
+        }
+
+        // --- ILUMINAÇÃO ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 15, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- CANVAS PARA A TELA LCD DO CELULAR ---
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 320;
+        const ctx = canvas.getContext('2d');
+
+        const screenTexture = new THREE.CanvasTexture(canvas);
+        screenTexture.minFilter = THREE.LinearFilter;
+
+        // Estado da Interface do Celular
+        let currentScreen = 'home'; // 'home', 'menu', 'messages', 'chat'
+        let selectedChatIndex = 0;
+        let chatScrollOffset = 0; 
+        let isMouseOverScreen = false; 
+
+        // Dados unificados de todas as conversas (Bia, Julia, Marina, Leticia, Carol, Manuela)
+        const conversations = [
+            {
+                name: "Bia",
+                messages: [
+                    { type: 'date', text: '--- 18 de Setembro ---' },
+                    { sender: "Bia", text: "e ai, sua mae decidiu?", time: "14:12" },
+                    { sender: "Camila", text: "mais ou menos", time: "14:13" },
+                    { sender: "Bia", text: "vai fazer alguma coisa entao?", time: "14:13" },
+                    { sender: "Camila", text: "ela deixou eu chamar as meninas", time: "14:14" },
+                    { sender: "Bia", text: "e vai ser quando?", time: "14:15" },
+                    { sender: "Camila", text: "sexta nao da pra ninguem", time: "14:15" },
+                    { sender: "Bia", text: "sabado e melhor", time: "14:16" },
+                    { sender: "Camila", text: "tbm acho", time: "14:16" },
+                    { sender: "Bia", text: "pelo menos da pra ficar ate mais tarde", time: "14:17" },
+                    { sender: "Camila", text: "e", time: "14:17" },
+                    { type: 'date', text: '--- 19 de Setembro ---' },
+                    { sender: "Bia", text: "sua irma ainda mexe nas suas coisas?", time: "18:40" },
+                    { sender: "Camila", text: "sempre", time: "18:41" },
+                    { sender: "Bia", text: "ela pegou aquele desenho?", time: "18:41" },
+                    { sender: "Camila", text: "pegou", time: "18:42" },
+                    { sender: "Bia", text: "e vc deixou?", time: "18:42" },
+                    { sender: "Camila", text: "ela tem 8 anos, nao vou brigar por isso", time: "18:43" },
+                    { sender: "Bia", text: "eu brigaria", time: "18:43" },
+                    { sender: "Camila", text: "por isso q ninguem gosta d vc", time: "18:44" },
+                    { type: 'date', text: '--- 20 de Setembro ---' },
+                    { sender: "Bia", text: "conseguiu terminar o trabalho de geografia?", time: "20:10" },
+                    { sender: "Camila", text: "terminei ontem a noite", time: "20:11" },
+                    { sender: "Bia", text: "ainda bem q a entrega e so na sexta da semana que vem", time: "20:12" },
+                    { sender: "Camila", text: "sim, dia 25 da tempo d sobra", time: "20:12" },
+                    { sender: "Bia", text: "beleza, me empresta depois?", time: "20:13" },
+                    { sender: "Camila", text: "Vou fazer esse fim de semana", time: "20:13" },
+                    { type: 'date', text: '--- 24 de Setembro ---' },
+                    { sender: "Bia", text: "Pq nao foi na aula hj?", time: "15:28" },
+                    { sender: "Bia", text: "Oiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii?????", time: "16:56" }
+                ]
+            },
+            {
+                name: "Júlia",
+                messages: [
+                    { type: 'date', text: '--- 18 de Setembro ---' },
+                    { sender: "Júlia", text: "vc ja sabe o q vai usar?", time: "16:20" },
+                    { sender: "Camila", text: "nao faco ideia", time: "16:21" },
+                    { sender: "Júlia", text: "vc nao tinha falado aquele?", time: "16:22" },
+                    { sender: "Camila", text: "minha mae achou caro", time: "16:22" },
+                    { sender: "Júlia", text: "entao vai com o outro", time: "16:23" },
+                    { sender: "Camila", text: "provavelmente", time: "16:23" },
+                    { sender: "Júlia", text: "vai ter bolo pelo menos?", time: "16:24" },
+                    { sender: "Camila", text: "obvio", time: "16:24" },
+                    { sender: "Júlia", text: "entao ta salvo", time: "16:25" },
+                    { type: 'date', text: '--- 20 de Setembro ---' },
+                    { sender: "Júlia", text: "vc vai amanha?", time: "19:00" },
+                    { sender: "Camila", text: "onde?", time: "19:01" },
+                    { sender: "Júlia", text: "na casa da Marina", time: "19:01" },
+                    { sender: "Camila", text: "acho q nao", time: "19:02" },
+                    { sender: "Júlia", text: "por q?", time: "19:02" },
+                    { sender: "Camila", text: "minha mae quer q eu fique em casa", time: "19:03" },
+                    { sender: "Júlia", text: "chato", time: "19:03" },
+                    { sender: "Camila", text: "eu sei", time: "19:04" }
+                ]
+            },
+            {
+                name: "Marina",
+                messages: [
+                    { type: 'date', text: '--- 19 de Setembro ---' },
+                    { sender: "Marina", text: "vc fez a atividade?", time: "10:05" },
+                    { sender: "Camila", text: "qual?", time: "10:06" },
+                    { sender: "Marina", text: "a de historia", time: "10:06" },
+                    { sender: "Camila", text: "eu esqueci", time: "10:07" },
+                    { sender: "Marina", text: "eu sabia", time: "10:07" },
+                    { sender: "Camila", text: "vc fez?", time: "10:08" },
+                    { sender: "Marina", text: "fiz na aula", time: "10:08" },
+                    { sender: "Camila", text: "entao m manda", time: "10:09" },
+                    { sender: "Marina", text: "nao", time: "10:09" },
+                    { sender: "Camila", text: "chata", time: "10:10" },
+                    { sender: "Marina", text: "se vira", time: "10:10" },
+                    { type: 'date', text: '--- 21 de Setembro ---' },
+                    { sender: "Marina", text: "vc ja decidiu a musica?", time: "14:30" },
+                    { sender: "Camila", text: "ainda nao kkkkk", time: "14:31" },
+                    { sender: "Camila", text: "mas tem q ser uma boa", time: "14:31" },
+                    { sender: "Marina", text: "vc falou isso ontem tbm", time: "14:32" },
+                    { sender: "Camila", text: "pq eu ainda nao achei uma q preste", time: "14:32" },
+                    { sender: "Marina", text: "a bia falou q vc ja escolheu a roupa", time: "14:33" },
+                    { sender: "Camila", text: "quase", time: "14:33" },
+                    { sender: "Camila", text: "quero um vestido bonito pelo menos", time: "14:34" },
+                    { sender: "Marina", text: "sabia", time: "14:34" },
+                    { sender: "Marina", text: "vc ta animada mesmo", time: "14:35" },
+                    { sender: "Camila", text: "claro q to", time: "14:35" },
+                    { sender: "Camila", text: "faz tempo q eu quero fazer alguma coisa assim", time: "14:36" },
+                    { sender: "Marina", text: "da pra perceber", time: "14:36" },
+                    { sender: "Marina", text: "vc nao fala de outra coisa", time: "14:37" },
+                    { sender: "Camila", text: "mentira", time: "14:37" },
+                    { sender: "Marina", text: "nao e nao", time: "14:38" },
+                    { sender: "Marina", text: "ontem vc ficou meia hora falando disso", time: "14:38" },
+                    { sender: "Camila", text: "ta bom", time: "14:39" },
+                    { sender: "Camila", text: "talvez eu esteja um pouco animada", time: "14:39" },
+                    { sender: "Camila", text: "estou contando os dias para outubro!", time: "14:40" }
+                ]
+            },
+            {
+                name: "Letícia",
+                messages: [
+                    { type: 'date', text: '--- 22 de Setembro ---' },
+                    { sender: "Letícia", text: "vc fez a parte de geo?", time: "15:10" },
+                    { sender: "Camila", text: "ainda n", time: "15:11" },
+                    { sender: "Letícia", text: "sabia kkkkk", time: "15:11" },
+                    { sender: "Letícia", text: "eu fiz ontem e ficou uma porcaria", time: "15:12" },
+                    { sender: "Camila", text: "qual era a pág msm?", time: "15:12" },
+                    { sender: "Letícia", text: "87 até 91", time: "15:13" },
+                    { sender: "Camila", text: "ah", time: "15:13" },
+                    { sender: "Camila", text: "faço dps", time: "15:14" },
+                    { sender: "Letícia", text: "vc n ia estudar mat?", time: "15:14" },
+                    { sender: "Camila", text: "ia", time: "15:15" },
+                    { sender: "Camila", text: "tenho q estudar pra terça", time: "15:15" },
+                    { sender: "Letícia", text: "dia 5?", time: "15:16" },
+                    { sender: "Camila", text: "é", time: "15:16" },
+                    { sender: "Letícia", text: "to ferrada", time: "15:17" },
+                    { sender: "Camila", text: "eu tbm", time: "15:17" }
+                ]
+            },
+            {
+                name: "Carol",
+                messages: [
+                    { type: 'date', text: '--- 22 de Setembro ---' },
+                    { sender: "Carol", text: "vc vai conseguir sábado?", time: "17:00" },
+                    { sender: "Camila", text: "acho q sim", time: "17:01" },
+                    { sender: "Carol", text: "então pronto", time: "17:01" },
+                    { sender: "Camila", text: "sexta n dá", time: "17:02" },
+                    { sender: "Carol", text: "eu sei", time: "17:02" },
+                    { sender: "Carol", text: "por isso falei sábado", time: "17:03" },
+                    { sender: "Camila", text: "minha mãe prefere assim tbm", time: "17:03" },
+                    { sender: "Carol", text: "melhor", time: "17:04" },
+                    { sender: "Carol", text: "ainda mais q vc vai estar livre", time: "17:04" },
+                    { sender: "Camila", text: "sim", time: "17:05" },
+                    { sender: "Camila", text: "finalmente", time: "17:05" },
+                    { sender: "Carol", text: "depois da última prova né?", time: "17:06" },
+                    { sender: "Camila", text: "sim", time: "17:06" },
+                    { sender: "Carol", text: "nossa, falta pouco então", time: "17:07" },
+                    { sender: "Camila", text: "ainda bem", time: "17:08" }
+                ]
+            },
+            {
+                name: "Manuela",
+                messages: [
+                    { type: 'date', text: '--- 23 de Setembro ---' },
+                    { sender: "Manuela", text: "vc estudou pra quarta?", time: "19:30" },
+                    { sender: "Camila", text: "ainda n", time: "19:31" },
+                    { sender: "Manuela", text: "eu tbm n", time: "19:31" },
+                    { sender: "Camila", text: "essa é a última pelo menos", time: "19:32" },
+                    { sender: "Manuela", text: "graças a deus", time: "19:32" },
+                    { sender: "Camila", text: "depois eu quero esquecer escola por uns dias", time: "19:33" },
+                    { sender: "Manuela", text: "justo kkkkk", time: "19:33" },
+                    { sender: "Camila", text: "sexta eu já vou estar de boa", time: "19:34" },
+                    { sender: "Manuela", text: "inveja", time: "19:34" },
+                    { sender: "Camila", text: "kkkkk", time: "19:35" }
+                ]
+            }
+        ];
+
+        function wrapTextAndGetLines(ctx, text, maxWidth) {
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                let word = words[i];
+                let width = ctx.measureText(currentLine + " " + word).width;
+                if (width < maxWidth) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // Função para desenhar a interface LCD no Canvas
+        function updateScreenCanvas() {
+            ctx.fillStyle = '#c7d7c5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Barra de status superior fixa
+            ctx.fillStyle = '#2f3e2e';
+            ctx.fillRect(0, 0, canvas.width, 24);
+            ctx.fillStyle = '#c7d7c5';
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.fillText("TCL 2004", 8, 16);
+            ctx.fillText("📶 🔋", 205, 16);
+
+            if (currentScreen === 'home') {
+                ctx.fillStyle = '#2f3e2e';
+                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.fillText("24 Set 2004", 85, 75);
+
+                ctx.strokeStyle = '#2f3e2e';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(20, 100, 216, 170);
+
+                ctx.fillStyle = '#2f3e2e';
+                ctx.font = '12px Roboto, sans-serif';
+                ctx.fillText("> Menu Principal", 35, 135);
+                ctx.fillText("  Mensagens (6)", 35, 165);
+                ctx.fillText("  Contatos", 35, 195);
+                ctx.fillText("  Configurações", 35, 225);
+
+            } else if (currentScreen === 'menu') {
+                ctx.fillStyle = '#2f3e2e';
+                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.fillText("-- MENU PRINCIPAL --", 50, 45);
+
+                const options = ["1. Mensagens", "2. Contatos", "3. Chamadas", "4. Configurações"];
+                options.forEach((opt, idx) => {
+                    ctx.strokeRect(20, 55 + (idx * 50), 216, 40);
+                    ctx.fillText(opt, 35, 80 + (idx * 50));
+                });
+
+            } else if (currentScreen === 'messages') {
+                ctx.fillStyle = '#2f3e2e';
+                ctx.font = 'bold 12px Roboto, sans-serif';
+                ctx.fillText("MENSAGENS (6)", 75, 42);
+
+                // Renderiza a lista de conversas com rolagem simples se necessário
+                conversations.forEach((conv, idx) => {
+                    let boxTop = 55 + (idx * 45);
+                    if (boxTop < 300) {
+                        ctx.strokeRect(15, boxTop, 226, 38);
+                        ctx.fillText(`• ${conv.name}`, 25, boxTop + 24);
+                    }
+                });
+
+            } else if (currentScreen === 'chat') {
+                const chat = conversations[selectedChatIndex];
+
+                let startY = 38 - chatScrollOffset;
+                let currentY = startY;
+
+                chat.messages.forEach((m) => {
+                    if (m.type === 'date') {
+                        // Renderização de divisor de data
+                        ctx.fillStyle = '#6b7d69';
+                        ctx.font = 'bold 9px Roboto, sans-serif';
+                        let textWidth = ctx.measureText(m.text).width;
+                        let dateX = (canvas.width - textWidth) / 2;
+                        
+                        if (currentY + 15 > 32 && currentY < 300) {
+                            ctx.fillText(m.text, dateX, currentY + 10);
+                        }
+                        currentY += 22;
+                    } else {
+                        const isCamila = (m.sender === 'Camila');
+                        ctx.font = '10px Roboto, sans-serif';
+                        
+                        let maxBubbleWidth = 140;
+                        let textLines = wrapTextAndGetLines(ctx, m.text, maxBubbleWidth);
+                        let bubbleHeight = (textLines.length * 13) + 14;
+                        let bubbleWidth = maxBubbleWidth + 10;
+                        let bubbleX = isCamila ? (240 - bubbleWidth) : 15;
+
+                        if (currentY + bubbleHeight > 32 && currentY < 300) {
+                            ctx.fillStyle = isCamila ? '#a4bca2' : '#b2c4b0';
+                            ctx.strokeStyle = '#2f3e2e';
+                            ctx.lineWidth = 1;
+                            ctx.fillRect(bubbleX, currentY, bubbleWidth, bubbleHeight);
+                            ctx.strokeRect(bubbleX, currentY, bubbleWidth, bubbleHeight);
+
+                            ctx.fillStyle = '#1b301a';
+                            ctx.font = 'bold 9px Roboto, sans-serif';
+                            
+                            if (isCamila) {
+                                let headerText = `${m.time} - ${m.sender}`;
+                                let textWidth = ctx.measureText(headerText).width;
+                                ctx.fillText(headerText, bubbleX + bubbleWidth - textWidth - 5, currentY + 11);
+                            } else {
+                                ctx.fillText(`${m.sender} - ${m.time}`, bubbleX + 5, currentY + 11);
+                            }
+
+                            ctx.fillStyle = '#111111';
+                            ctx.font = '10px Roboto, sans-serif';
+                            let textY = currentY + 23;
+                            textLines.forEach(line => {
+                                ctx.fillText(line, bubbleX + 5, textY);
+                                textY += 13;
+                            });
+                        }
+
+                        currentY += bubbleHeight + 6;
+                    }
+                });
+
+                ctx.fillStyle = '#2f3e2e';
+                ctx.fillRect(0, 0, canvas.width, 24);
+                ctx.fillStyle = '#c7d7c5';
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.fillText("TCL 2004", 8, 16);
+                ctx.fillText("📶 🔋", 205, 16);
+            }
+
+            screenTexture.needsUpdate = true;
+        }
+
+        updateScreenCanvas();
+
+        // --- CONSTRUÇÃO DO MODELO 3D DO CELULAR FIXO ---
+        const phoneGroup = new THREE.Group();
+        scene.add(phoneGroup);
+
+        const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x2b3a42, roughness: 0.4, metalness: 0.6 });
+        const screenBezelMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2 });
+        const keyMaterial = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.5 });
+        const softKeyMaterial = new THREE.MeshStandardMaterial({ color: 0xa0a0a0, roughness: 0.5 });
+
+        const bodyGeometry = new THREE.BoxGeometry(3.6, 8.5, 0.6);
+        const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        bodyMesh.castShadow = true;
+        phoneGroup.add(bodyMesh);
+
+        const screenBezelGeo = new THREE.PlaneGeometry(2.8, 3.4);
+        const screenBezel = new THREE.Mesh(screenBezelGeo, screenBezelMat);
+        screenBezel.position.set(0, 2.0, 0.31);
+        phoneGroup.add(screenBezel);
+
+        const screenGeo = new THREE.PlaneGeometry(2.4, 3.0);
+        const screenMat = new THREE.MeshBasicMaterial({ map: screenTexture });
+        const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+        screenMesh.name = "phoneScreen";
+        screenMesh.position.set(0, 2.0, 0.32);
+        phoneGroup.add(screenMesh);
+
+        const leftSoftKeyGeo = new THREE.BoxGeometry(1.1, 0.4, 0.1);
+        const leftSoftKey = new THREE.Mesh(leftSoftKeyGeo, softKeyMaterial);
+        leftSoftKey.position.set(-0.7, -0.05, 0.32);
+        leftSoftKey.name = "btnLeft";
+        phoneGroup.add(leftSoftKey);
+
+        const rightSoftKeyGeo = new THREE.BoxGeometry(1.1, 0.4, 0.1);
+        const rightSoftKey = new THREE.Mesh(rightSoftKeyGeo, softKeyMaterial);
+        rightSoftKey.position.set(0.7, -0.05, 0.32);
+        rightSoftKey.name = "btnRight";
+        phoneGroup.add(rightSoftKey);
+
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 3; c++) {
+                const keyGeo = new THREE.BoxGeometry(0.8, 0.4, 0.1);
+                const key = new THREE.Mesh(keyGeo, keyMaterial);
+                key.position.set((c - 1) * 0.9, -0.7 - (r * 0.55), 0.32);
+                phoneGroup.add(key);
+            }
+        }
+
+        const antennaGeo = new THREE.CylinderGeometry(0.12, 0.12, 1.2, 8);
+        const antenna = new THREE.Mesh(antennaGeo, bodyMaterial);
+        antenna.position.set(1.3, 4.25, 0);
+        phoneGroup.add(antenna);
+
+        // --- LÓGICA DE NAVEGAÇÃO, ZOOM E CLIQUES ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(screenMesh);
+            isMouseOverScreen = (intersects.length > 0);
+
+            // Bloqueia o zoom da câmera do OrbitControls se o mouse estiver sobre a tela do celular
+            controls.enableZoom = !isMouseOverScreen;
+        });
+
+        window.addEventListener('wheel', (event) => {
+            if (currentScreen === 'chat' && isMouseOverScreen) {
+                event.preventDefault(); 
+                chatScrollOffset += event.deltaY * 0.3;
+                if (chatScrollOffset < 0) chatScrollOffset = 0;
+                if (chatScrollOffset > 2200) chatScrollOffset = 2200; 
+                updateScreenCanvas();
+            }
+        }, { passive: false });
+
+        window.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(phoneGroup.children, true);
+
+            if (intersects.length > 0) {
+                const hitObject = intersects[0].object;
+
+                if (hitObject.name === "btnLeft") {
+                    handleButtonAction('left');
+                } else if (hitObject.name === "btnRight") {
+                    handleButtonAction('right');
+                } else if (hitObject.name === "phoneScreen") {
+                    const uv = intersects[0].uv;
+                    if (uv) {
+                        const x = uv.x * canvas.width;
+                        const y = (1 - uv.y) * canvas.height;
+                        handleScreenClick(x, y);
+                    }
+                }
+            }
+        });
+
+        function handleButtonAction(btn) {
+            if (btn === 'left') {
+                if (currentScreen === 'home') {
+                    currentScreen = 'menu';
+                } else if (currentScreen === 'menu') {
+                    currentScreen = 'messages';
+                }
+            } else if (btn === 'right') {
+                if (currentScreen === 'chat') {
+                    currentScreen = 'messages';
+                    chatScrollOffset = 0;
+                } else if (currentScreen === 'messages') {
+                    currentScreen = 'menu';
+                } else if (currentScreen === 'menu') {
+                    currentScreen = 'home';
+                }
+            }
+            updateScreenCanvas();
+        }
+
+        function handleScreenClick(x, y) {
+            if (currentScreen === 'home') {
+                if (y > 100 && y < 270) {
+                    currentScreen = 'menu';
+                }
+            } else if (currentScreen === 'menu') {
+                for (let i = 0; i < 4; i++) {
+                    let boxTop = 55 + (i * 50);
+                    if (y >= boxTop && y <= boxTop + 40) {
+                        if (i === 0) currentScreen = 'messages';
+                        break;
+                    }
+                }
+            } else if (currentScreen === 'messages') {
+                for (let i = 0; i < conversations.length; i++) {
+                    let boxTop = 55 + (i * 45);
+                    if (y >= boxTop && y <= boxTop + 38) {
+                        selectedChatIndex = i;
+                        currentScreen = 'chat';
+                        chatScrollOffset = 0;
+                        break;
+                    }
+                }
+            }
+            updateScreenCanvas();
+        }
+
+        // --- LOOP DE ANIMAÇÃO ---
+        function animate() {
+            requestAnimationFrame(animate);
+            updateCameraPosition();
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
