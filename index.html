@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso ao RPG</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 300px;
+        }
+        input {
+            width: 85%;
+            padding: 10px;
+            margin: 15px 0;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button {
+            width: 92%;
+            padding: 10px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #erro {
+            color: #ff5252;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>Entrar na Sessão</h2>
+        <input type="password" id="senhaInput" placeholder="Digite a senha..." autofocus>
+        <button onclick="verificarSenha()">Acessar</button>
+        <div id="erro"></div>
+    </div>
+
+    <script>
+        function verificarSenha() {
+            const senha = document.getElementById("senhaInput").value.trim();
+            const erroDiv = document.getElementById("erro");
+
+            // Mapeamento de Senhas -> Páginas HTML correspondentes
+            const rotas = {
+                "senha123": "sala1.html",
+                "mestre10": "sala2.html",
+                "tesouro": "segredo.html"
+            };
+
+            if (rotas[senha]) {
+                // Redireciona para o HTML correspondente
+                window.location.href = rotas[senha];
+            } else {
+                erroDiv.textContent = "Senha incorreta!";
+            }
+        }
+
+        // Permitir apertar "Enter" para enviar
+        document.getElementById("senhaInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                verificarSenha();
+            }
+        });
+    </script>
+
+</body>
+</html>
