@@ -3,118 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Acesso RPG</title>
+    <title>Acesso ao RPG</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
         body {
-            background-color: #0d0f12;
-            color: #e0e6ed;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
         }
-        .login-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        .login-box {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             text-align: center;
-            width: 100%;
-            max-width: 360px;
+            width: 340px;
         }
-        .login-card h2 {
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            color: #58a6ff;
-            letter-spacing: 1px;
+        input {
+            width: 85%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 15px;
         }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: #f0f6fc;
-            border-radius: 6px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus {
-            border-color: #58a6ff;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #238636;
+        button.btn-acessar {
+            width: 92%;
+            padding: 10px;
+            background: #4CAF50;
             border: none;
             color: white;
-            font-size: 1rem;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s;
+            margin-bottom: 15px;
         }
-        button:hover {
-            background: #2ea043;
+        button.btn-acessar:hover {
+            background: #45a049;
+        }
+        .lista-senhas {
+            border-top: 1px solid #333;
+            padding-top: 15px;
+            text-align: left;
+        }
+        .lista-senhas p {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .atalhos-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .btn-atalho {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 13px;
+            transition: background 0.2s, border-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-atalho:hover {
+            background: #383838;
+            border-color: #666;
+            color: #fff;
+        }
+        .btn-atalho span {
+            color: #4CAF50;
+            font-family: monospace;
         }
         #erro {
-            color: #f85149;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            min-height: 20px;
+            color: #ff5252;
+            margin-top: 8px;
+            font-size: 13px;
+            min-height: 18px;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>PORTAL DE ACESSO</h2>
-        <div class="input-group">
-            <input type="text" id="senhaInput" placeholder="Digite a palavra-chave..." autofocus autocomplete="off">
-        </div>
-        <button onclick="verificarSenha()">Acessar</button>
+    <div class="login-box">
+        <h2>Entrar na Sessão</h2>
+        <input type="password" id="senhaInput" placeholder="Digite a senha..." autofocus>
+        <button class="btn-acessar" onclick="verificarSenha()">Acessar</button>
         <div id="erro"></div>
+
+        <div class="lista-senhas">
+            <p>Atalhos rápidos (Páginas)</p>
+            <div class="atalhos-container">
+                <button class="btn-atalho" onclick="acessarDireto('caderno.html')">Caderno <span>caderno</span></button>
+                <button class="btn-atalho" onclick="acessarDireto('Celular - c.html')">Celular <span>celular</span></button>
+                <button class="btn-atalho" onclick="acessarDireto('Cubo Mágico 3D.html')">Cubo Mágico 3D <span>cubo magico</span></button>
+                <button class="btn-atalho" onclick="acessarDireto('papel amassado.html')">Papel Amassado <span>papel amassado</span></button>
+                <button class="btn-atalho" onclick="acessarDireto('Post-it.html')">Post-it <span>post-it</span></button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Função para remover acentos e converter para minúsculas
-        function normalizar(texto) {
-            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        }
-
-        // Mapeamento de senhas normalizadas -> arquivo HTML correspondente
+        // Mapeamento de senhas limpas para os arquivos reais
         const rotas = {
             "caderno": "Caderno.html",
             "celular": "Celular - c.html",
             "cubo magico": "Cubo Mágico 3D.html",
             "cubo magico 3d": "Cubo Mágico 3D.html",
             "papel amassado": "papel amassado.html",
-            "post it": "Post-it.html",
-            "post-it": "Post-it.html"
+            "post-it": "Post-it.html",
+            "post it": "Post-it.html"
         };
 
+        function normalizar(texto) {
+            return texto.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
         function verificarSenha() {
-            const entrada = document.getElementById("senhaInput").value;
-            const entradaNormalizada = normalizar(entrada);
+            const valorDigitado = normalizar(document.getElementById("senhaInput").value);
             const erroDiv = document.getElementById("erro");
 
-            if (rotas[entradaNormalizada]) {
-                window.location.href = encodeURI(rotas[entradaNormalizada]);
+            if (rotas[valorDigitado]) {
+                window.location.href = rotas[valorDigitado];
             } else {
-                erroDiv.textContent = "Senha incorreta ou item não encontrado!";
+                erroDiv.textContent = "Senha incorreta!";
             }
         }
 
+        function acessarDireto(pagina) {
+            window.location.href = pagina;
+        }
+
+        // Permitir apertar "Enter" para enviar
         document.getElementById("senhaInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 verificarSenha();
