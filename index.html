@@ -3,157 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso ao RPG</title>
+    <title>Portal de Acesso RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0e12;
+            background-image: radial-gradient(circle at center, #1a1c23 0%, #0d0e12 100%);
         }
-        .login-box {
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            text-align: center;
-            width: 340px;
-        }
-        input {
-            width: 85%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #2d2d2d;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 15px;
-        }
-        button.btn-acessar {
-            width: 92%;
-            padding: 10px;
-            background: #4CAF50;
-            border: none;
-            color: white;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        button.btn-acessar:hover {
-            background: #45a049;
-        }
-        .lista-senhas {
-            border-top: 1px solid #333;
-            padding-top: 15px;
-            text-align: left;
-        }
-        .lista-senhas p {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 8px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .atalhos-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .btn-atalho {
-            background: #2d2d2d;
-            border: 1px solid #444;
-            color: #ddd;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 13px;
-            transition: background 0.2s, border-color 0.2s;
-            display: flex;
-            justify-content: space-between;
-        }
-        .btn-atalho:hover {
-            background: #383838;
-            border-color: #666;
-            color: #fff;
-        }
-        .btn-atalho span {
-            color: #4CAF50;
-            font-family: monospace;
-        }
-        #erro {
-            color: #ff5252;
-            margin-top: 8px;
-            font-size: 13px;
-            min-height: 18px;
+        .rpg-title {
+            font-family: 'Cinzel', serif;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
 
-    <div class="login-box">
-        <h2>Entrar na Sessão</h2>
-        <input type="password" id="senhaInput" placeholder="Digite a senha..." autofocus>
-        <button class="btn-acessar" onclick="verificarSenha()">Acessar</button>
-        <div id="erro"></div>
+    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        
+        <!-- Header Section -->
+        <div class="text-center space-y-2">
+            <div class="inline-flex p-3 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h1 class="rpg-title text-2xl sm:text-3xl font-bold tracking-wide text-amber-400">Portal de Acesso</h1>
+            <p class="text-xs sm:text-sm text-slate-400">Digite a senha para desbloquear um documento ou objeto</p>
+        </div>
 
-        <div class="lista-senhas">
-            <p>Atalhos rápidos (Páginas)</p>
-            <div class="atalhos-container">
-                <button class="btn-atalho" onclick="acessarDireto('caderno.html')">Caderno <span>caderno</span></button>
-                <button class="btn-atalho" onclick="acessarDireto('Celular - c.html')">Celular <span>celular</span></button>
-                <button class="btn-atalho" onclick="acessarDireto('Cubo Mágico 3D.html')">Cubo Mágico 3D <span>cubo magico</span></button>
-                <button class="btn-atalho" onclick="acessarDireto('papel amassado.html')">Papel Amassado <span>papel amassado</span></button>
-                <button class="btn-atalho" onclick="acessarDireto('Post-it.html')">Post-it <span>post-it</span></button>
+        <!-- Input Form -->
+        <div class="space-y-4">
+            <div>
+                <label for="senhaInput" class="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">Palavra-Chave / Senha</label>
+                <input 
+                    type="password" 
+                    id="senhaInput" 
+                    placeholder="Digite a palavra passe..." 
+                    autofocus
+                    class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 transition"
+                >
+            </div>
+
+            <button 
+                onclick="verificarSenha()" 
+                class="w-full py-3 px-4 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-900/20 transition duration-150 ease-in-out flex items-center justify-center gap-2"
+            >
+                <span>Acessar Documento</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+
+            <!-- Error Message -->
+            <div id="erro" class="text-xs text-red-400 text-center min-h-[20px] font-medium"></div>
+        </div>
+
+        <!-- Shortcuts Section (Rendered dynamically if unlocked items exist) -->
+        <div id="atariosContainer" class="pt-4 border-t border-slate-800 space-y-3 hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    Atalhos Desbloqueados
+                </span>
+                <button 
+                    onclick="limparHistorico()" 
+                    class="text-[11px] text-slate-500 hover:text-red-400 transition underline underline-offset-2"
+                    title="Remover todos os atalhos salvos"
+                >
+                    Limpar Histórico
+                </button>
+            </div>
+
+            <!-- List of unlocked items buttons -->
+            <div id="listaAtalhos" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <!-- Dynamic shortcut buttons will appear here -->
             </div>
         </div>
+
     </div>
 
+    <!-- JavaScript Logic -->
     <script>
-        // Mapeamento de senhas limpas para os arquivos reais
+        // Mapping of keys to display names and HTML filenames
         const rotas = {
-            "caderno": "Caderno.html",
-            "celular": "Celular - c.html",
-            "cubo magico": "Cubo Mágico 3D.html",
-            "cubo magico 3d": "Cubo Mágico 3D.html",
-            "papel amassado": "papel amassado.html",
-            "post-it": "Post-it.html",
-            "post it": "Post-it.html"
+            "caderno": {
+                nome: "Caderno",
+                arquivo: "Caderno.html"
+            },
+            "celular": {
+                nome: "Celular",
+                arquivo: "Celular - c.html"
+            },
+            "cubo magico": {
+                nome: "Cubo Mágico 3D",
+                arquivo: "Cubo Mágico 3D.html"
+            },
+            "cubo magico 3d": {
+                nome: "Cubo Mágico 3D",
+                arquivo: "Cubo Mágico 3D.html"
+            },
+            "papel amassado": {
+                nome: "Papel Amassado",
+                arquivo: "papel amassado.html"
+            },
+            "post it": {
+                nome: "Post-it",
+                arquivo: "Post-it.html"
+            },
+            "post-it": {
+                nome: "Post-it",
+                arquivo: "Post-it.html"
+            }
         };
 
-        function normalizar(texto) {
-            return texto.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // Normalize input string: removes accents, converts to lowercase, and strips extra spaces
+        function normalizarTexto(str) {
+            return str
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .trim();
         }
 
-        function verificarSenha() {
-            const valorDigitado = normalizar(document.getElementById("senhaInput").value);
-            const erroDiv = document.getElementById("erro");
-
-            if (rotas[valorDigitado]) {
-                window.location.href = rotas[valorDigitado];
-            } else {
-                erroDiv.textContent = "Senha incorreta!";
+        // Retrieve unlocked shortcuts from localStorage
+        function obterDesbloqueados() {
+            try {
+                const salvos = localStorage.getItem("rpg_desbloqueados");
+                return salvos ? JSON.parse(salvos) : [];
+            } catch (e) {
+                console.error("Erro ao ler localStorage", e);
+                return [];
             }
         }
 
-        function acessarDireto(pagina) {
-            window.location.href = pagina;
+        // Save new unlocked item to localStorage
+        function salvarDesbloqueado(chaveItem) {
+            const desbloqueados = obterDesbloqueados();
+            if (!desbloqueados.includes(chaveItem)) {
+                desbloqueados.push(chaveItem);
+                try {
+                    localStorage.setItem("rpg_desbloqueados", JSON.stringify(desbloqueados));
+                } catch (e) {
+                    console.error("Erro ao salvar no localStorage", e);
+                }
+            }
         }
 
-        // Permitir apertar "Enter" para enviar
+        // Render shortcuts UI
+        function renderizarAtalhos() {
+            const desbloqueados = obterDesbloqueados();
+            const container = document.getElementById("atariosContainer");
+            const lista = document.getElementById("listaAtalhos");
+
+            lista.innerHTML = "";
+
+            if (desbloqueados.length === 0) {
+                container.classList.add("hidden");
+                return;
+            }
+
+            container.classList.remove("hidden");
+
+            // Filter unique documents saved
+            const itensUnicos = [];
+            desbloqueados.forEach(chave => {
+                const item = rotas[chave];
+                if (item && !itensUnicos.some(i => i.arquivo === item.arquivo)) {
+                    itensUnicos.push(item);
+                }
+            });
+
+            itensUnicos.forEach(item => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left px-3 py-2 bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 rounded-lg text-xs font-medium text-slate-300 hover:text-amber-400 transition flex items-center justify-between group";
+                btn.onclick = () => window.location.href = encodeURI(item.arquivo);
+                btn.innerHTML = `
+                    <span class="truncate">${item.nome}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-600 group-hover:text-amber-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                `;
+                lista.appendChild(btn);
+            });
+        }
+
+        // Validate typed password
+        function verificarSenha() {
+            const entrada = document.getElementById("senhaInput").value;
+            const senhaNormalizada = normalizarTexto(entrada);
+            const erroDiv = document.getElementById("erro");
+
+            if (rotas[senhaNormalizada]) {
+                erroDiv.textContent = "";
+                // Save key to history before redirecting
+                salvarDesbloqueado(senhaNormalizada);
+                // Redirect to document
+                window.location.href = encodeURI(rotas[senhaNormalizada].arquivo);
+            } else {
+                erroDiv.textContent = "Senha incorreta! Verifique a palavra digitada.";
+            }
+        }
+
+        // Clear unlocked history
+        function limparHistorico() {
+            if (confirm("Deseja realmente limpar o histórico de atalhos desbloqueados?")) {
+                localStorage.removeItem("rpg_desbloqueados");
+                renderizarAtalhos();
+            }
+        }
+
+        // Pressing 'Enter' triggers validation
         document.getElementById("senhaInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 verificarSenha();
             }
         });
-    </script>
 
+        // Initialize shortcuts display on page load
+        window.onload = function() {
+            renderizarAtalhos();
+        };
+    </script>
 </body>
 </html>
